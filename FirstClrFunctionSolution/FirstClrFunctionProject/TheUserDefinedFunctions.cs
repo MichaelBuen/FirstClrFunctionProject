@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
+
 using System.Data.SqlTypes;
-using Microsoft.SqlServer.Server;
-using System.Collections;
 using System.Data.SqlClient;
+
+using Microsoft.SqlServer.Server;
 
 namespace FirstClrFunctionProject
 {
