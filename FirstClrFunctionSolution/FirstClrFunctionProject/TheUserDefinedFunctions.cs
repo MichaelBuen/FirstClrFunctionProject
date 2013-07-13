@@ -13,8 +13,8 @@ namespace FirstClrFunctionProject
     {
         private class Person
         {
-            public SqlInt32 PersonId; 
-            public SqlString PersonName; 
+            public SqlInt32 PersonId;
+            public SqlString PersonName;
 
             public Person(SqlInt32 personId, SqlString personName)
             {
@@ -28,25 +28,26 @@ namespace FirstClrFunctionProject
            DataAccess = DataAccessKind.Read,
            FillRowMethodName = "FindBandMembers_FillRow",
            TableDefinition = "PersonId int, PersonName nvarchar(4000)")]
-        public static IEnumerable FindBandMembers()
+        public static IEnumerable FindBandMembers(SqlString s)
         {
             bool tryTheAwesome = true;
 
-    
+            string field = s.Value;
+
             if (tryTheAwesome)
             {
                 string connectionString; // "context connection=true"; // can't work on streaming, i.e. this connection string doesn't work if we are using: yield return
-                connectionString = "data source=.;initial catalog=AdventureWorks2012;integrated security=SSPI;enlist=false";
-                
+                connectionString = "data source=localhost;initial catalog=AdventureWorks2012;integrated security=SSPI;enlist=false";
+
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    using (var personsFromDb = new SqlCommand("select BusinessEntityId, FirstName from Person.Person", connection))                    
+                    using (var personsFromDb = new SqlCommand("select BusinessEntityId, " +  field + " from Person.Person", connection))
                     using (var personsReader = personsFromDb.ExecuteReader())
                     {
                         while (personsReader.Read())
-                        {                                
+                        {
                             yield return new Person(personId: personsReader.GetInt32(0), personName: personsReader.GetString(1));
                         }
                     }//using                    
@@ -61,13 +62,13 @@ namespace FirstClrFunctionProject
             yield return new Person(personId: 6, personName: "Nino");
             yield return new Person(personId: 7, personName: "Marc");
             yield return new Person(personId: 8, personName: "Michael");
-            
-            
+
+
         }
 
         public static void FindBandMembers_FillRow(object personObj, out SqlInt32 personId, out SqlString personName)
         {
-            var p = (Person) personObj;
+            var p = (Person)personObj;
 
             personId = p.PersonId;
             personName = p.PersonName;
@@ -138,7 +139,7 @@ GO
 -- Thanks Stackoverflow! 
 -- http://stackoverflow.com/questions/7823488/sql-server-could-not-find-type-in-the-assembly
 
-CREATE FUNCTION FindBandMembers() 
+CREATE FUNCTION FindBandMembers(@hmm nvarchar(4000)) 
 RETURNS TABLE (
    PersonId int,
    PersonName nvarchar(4000)
@@ -146,7 +147,7 @@ RETURNS TABLE (
 AS EXTERNAL NAME FirstClrFunctionProject.[FirstClrFunctionProject.TheUserDefinedFunctions].[FindBandMembers];
 go
 
-SELECT * FROM dbo.FindBandMembers() order by personId;
+SELECT * FROM dbo.FindBandMembers('FirstName') order by personId;
 go
 
 
